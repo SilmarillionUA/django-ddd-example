@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block main %}
+  <h1 class="h3 mb-4">{% translate "My loans" %}</h1>
+  {% if my_loans.is_member %}
+    <form class="row g-2 mb-4"
+          method="post"
+          action="{% url 'lending:borrow' %}"
+          hx-post="{% url 'lending:borrow' %}"
+          hx-target="#loan-table">
+      {% csrf_token %}
+      <div class="col-auto">
+        <input type="text"
+               class="form-control"
+               name="{{ barcode_field }}"
+               placeholder="{% translate 'Copy barcode' %}"
+               required>
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-fw fa-book-open"></i> {% translate "Borrow" %}
+        </button>
+      </div>
+    </form>
+    <div class="form-check mb-3">
+      <input class="form-check-input"
+             type="checkbox"
+             id="include-returned"
+             name="{{ include_returned_param }}"
+             value="{{ include_returned_on }}"
+             {% if my_loans.include_returned %}checked{% endif %}
+             hx-get="{% url 'lending:my_loans_table' %}"
+             hx-target="#loan-table">
+      <label class="form-check-label" for="include-returned">{% translate "Show returned books" %}</label>
+    </div>
+  {% endif %}
+  <div id="loan-table">{% include "lending/partials/_loan_table.html" %}</div>
+{% endblock main %}

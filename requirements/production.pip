@@ -1,0 +1,4 @@
+# There should be no dependency in production that is not in development.
+-r base.pip
+
+gunicorn==23.0.0

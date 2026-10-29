@@ -1,0 +1,7 @@
+{% load i18n %}{% blocktranslate %}Hello,
+
+"{{ book_title }}" is due back on {{ due_on }}.
+
+You can renew it from the "My loans" page if you need more time.
+
+Your library{% endblocktranslate %}

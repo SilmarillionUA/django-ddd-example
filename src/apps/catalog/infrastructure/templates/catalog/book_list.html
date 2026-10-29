@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block main %}
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">{% translate "Catalog" %}</h1>
+    {% if user.is_staff %}
+      <a class="btn btn-outline-primary" href="{% url 'catalog:book_create' %}">
+        <i class="fas fa-fw fa-plus"></i> {% translate "Add book" %}
+      </a>
+    {% endif %}
+  </div>
+  <input type="search"
+         class="form-control mb-3"
+         name="{{ search_param }}"
+         value="{{ book_search.search }}"
+         placeholder="{% translate 'Title, author or ISBN' %}"
+         hx-get="{% url 'catalog:book_table' %}"
+         hx-trigger="input changed delay:300ms, search"
+         hx-target="#book-table">
+  <div id="book-table">{% include "catalog/partials/_book_table.html" %}</div>
+{% endblock main %}

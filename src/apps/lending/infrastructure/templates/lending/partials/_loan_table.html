@@ -1,0 +1,56 @@
+{% load i18n %}
+{% if show_messages %}
+  {% include "partials/_messages.html" %}
+{% endif %}
+{% if not my_loans.is_member %}
+  <p class="text-muted">{% translate "You do not have a library card yet. Ask at the desk." %}</p>
+{% elif my_loans.has_rows %}
+  <table class="table align-middle">
+    <thead>
+      <tr>
+        <th>{% translate "Book" %}</th>
+        <th>{% translate "Barcode" %}</th>
+        <th>{% translate "Due" %}</th>
+        <th class="text-end">{% translate "Actions" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in my_loans.rows %}
+        <tr>
+          <td>{{ row.book_title }}</td>
+          <td>{{ row.barcode }}</td>
+          <td>
+            {% if not row.is_open %}
+              {% blocktranslate with returned_on=row.returned_on %}Returned {{ returned_on }}{% endblocktranslate %}
+              {% if row.late_fee_cents %}
+                <span class="text-danger">{% blocktranslate with amount=row.late_fee_amount %}fee {{ amount }}{% endblocktranslate %}</span>
+              {% endif %}
+            {% elif row.is_overdue %}
+              <span class="text-danger">{{ row.due_on }}</span>
+            {% else %}
+              {{ row.due_on }}
+            {% endif %}
+          </td>
+          <td class="text-end">
+            {% if row.is_open %}
+              {% if row.can_renew %}
+                <button class="btn btn-sm btn-outline-secondary"
+                        hx-post="{% url 'lending:renew_loan' loan_id=row.loan_id %}"
+                        hx-target="#loan-table">
+                  <i class="fas fa-fw fa-rotate"></i> {% translate "Renew" %}
+                </button>
+              {% endif %}
+              <button class="btn btn-sm btn-outline-primary"
+                      hx-post="{% url 'lending:return_loan' loan_id=row.loan_id %}"
+                      hx-target="#loan-table">
+                <i class="fas fa-fw fa-rotate-left"></i> {% translate "Return" %}
+              </button>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p class="text-muted">{% translate "No loans to show." %}</p>
+{% endif %}

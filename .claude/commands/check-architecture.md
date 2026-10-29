@@ -1,0 +1,1 @@
+Run `make architecture`. For each violation, explain which layer rule it breaks and fix it: move the code to the right layer, or add an interface in `domain/interfaces.py` with a gateway in `infrastructure/gateways.py` and wire it in `infrastructure/di.py`. Run `make architecture` and `make test` again until both pass.

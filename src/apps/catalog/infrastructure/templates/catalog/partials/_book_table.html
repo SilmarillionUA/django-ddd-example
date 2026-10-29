@@ -1,0 +1,36 @@
+{% load i18n %}
+{% if book_search.has_rows %}
+  <table class="table align-middle">
+    <thead>
+      <tr>
+        <th>{% translate "Title" %}</th>
+        <th>{% translate "Author" %}</th>
+        <th>{% translate "ISBN" %}</th>
+        <th class="text-end">{% translate "Copies on shelf" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in book_search.rows %}
+        <tr>
+          <td>{{ row.title }}</td>
+          <td>{{ row.author }}</td>
+          <td>{{ row.isbn }}</td>
+          <td class="text-end">
+            {% if row.is_lendable %}
+              {{ row.lendable_copies }}
+            {% else %}
+              <span class="text-muted">{% translate "None" %}</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if book_search.is_full_page %}
+    <p class="text-muted">
+      {% blocktranslate with count=book_search.max_books %}Showing the first {{ count }} books. Narrow the search to see the rest.{% endblocktranslate %}
+    </p>
+  {% endif %}
+{% else %}
+  <p class="text-muted">{% translate "No books found." %}</p>
+{% endif %}
