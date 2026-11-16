@@ -11,27 +11,26 @@ Two bounded contexts, one Django app each:
 
 The repository is set up so an AI agent works inside the architecture instead of around it. The rules live in `CLAUDE.md`. The parts that must never be broken are checked by code rather than left to the prompt.
 
+The skills, subagents, commands and hooks come from the [django-ddd plugin](https://github.com/SilmarillionUA/django-ddd-claude-plugin). This repository only holds what is specific to it:
+
 ```
 CLAUDE.md                      project rules, loaded every session
 src/apps/<app>/CLAUDE.md       invariants of one bounded context
 .claude/
-├── settings.json              shared permissions and hooks
-├── hooks/
-│   ├── ddd_layer_guard.py     rejects imports that point outward
-│   ├── auto_format.py         isort + black / djade on the edited file
-│   └── safety_check.py        blocks destructive shell commands
-├── skills/
-│   ├── ddd-feature/           a feature across all layers, in order
-│   └── new-app, new-model, new-usecase, new-gateway, new-service,
-│       new-task, new-view, htmx-endpoint, new-admin, new-form
-├── agents/
-│   ├── ddd-reviewer.md        reviews a diff against the layer rules
-│   └── test-writer.md         writes tests in the layer that owns the code
-└── commands/
-    └── review, check-architecture, lint, format
+├── settings.json              permissions, and the plugin switched on
+└── django-ddd.json            apps root and formatters for the plugin's hooks
+scripts/
+└── ddd_layer_guard.py         the plugin's layer check, copied for make and CI
 ```
 
-**Hooks make the architecture enforceable.** After every edit, `ddd_layer_guard.py` parses the file's imports. If a `domain/` or `application/` module imports `infrastructure/` or another app, the hook exits with code 2 and Claude gets the reason with the fix:
+Claude Code offers to install the plugin when you trust the folder. To do it by hand:
+
+```
+/plugin marketplace add SilmarillionUA/django-ddd-claude-plugin
+/plugin install django-ddd@django-ddd-claude-plugin
+```
+
+**Hooks make the architecture enforceable.** After every edit, the plugin's layer guard parses the file's imports. If a `domain/` or `application/` module imports `infrastructure/` or another app, the hook exits with code 2 and Claude gets the reason with the fix:
 
 ```
 src/apps/lending/application/use_cases/borrow_copy.py:3: application imports
@@ -39,9 +38,9 @@ another app (catalog.domain.models). Add an interface in
 lending/domain/interfaces.py and a gateway in lending/infrastructure/gateways.py.
 ```
 
-The same script runs over the whole tree in `make lint` (`make architecture`), so humans and CI get the same check. `auto_format.py` formats only the file just edited, so diffs never carry style noise. `safety_check.py` stops `dropdb`, `DROP TABLE`, `migrate --fake`, force pushes, `git reset --hard` and `rm -rf` on root or home before they run.
+The same script runs over the whole tree in `make lint` (`make architecture`), so humans and CI get the same check. A second hook formats only the file just edited, with the commands in `.claude/django-ddd.json`, so diffs never carry style noise. A third stops `dropdb`, `DROP TABLE`, `migrate --fake`, force pushes, `git reset --hard` and `rm -rf` on root or home before they run.
 
-**Skills carry the conventions.** Each skill describes one kind of change in this project's terms: where the file goes, what it looks like, how it is wired into the DI container and which tests it needs. Claude loads a skill when a request matches its description, or the user calls it by name (`/new-usecase`). `ddd-feature` ties them together: domain, then use case, then gateways, then delivery, then the finish checks.
+**Skills carry the conventions.** Each skill describes one kind of change: where the file goes, what it looks like, how it is wired into the DI container and which tests it needs. Claude loads a skill when a request matches its description, or the user calls it by name (`/django-ddd:new-usecase`). `ddd-feature` ties them together: domain, then use case, then gateways, then delivery, then the finish checks.
 
 **Subagents keep the review independent.** `ddd-reviewer` reads the diff with only the rules in front of it and reports one line per finding with severity and fix. It cannot edit files. `test-writer` adds tests in the layer that owns the code, using the existing `make_*` fixtures and stub gateways.
 

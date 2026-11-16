@@ -58,9 +58,18 @@
 
 Each app has a `CLAUDE.md` of at most 30 lines: what the context owns, invariants the code does not show, cross-app dependencies, gotchas. Do not list files or restate this file. Update it when the rules change.
 
+## Tools the skills need to know
+
+- Background tasks are Celery `shared_task` functions in `infrastructure/tasks.py`, found by `autodiscover_tasks` in `project_src/celery.py`.
+- Partial page updates use HTMX. Detect it with `corelib.http.is_htmx(request)`. CSRF comes from `hx-headers` on `<body>` in `base.html`. Fragments live in `templates/<app>/partials/_name.html`. Test with `HTTP_HX_REQUEST="true"`.
+- The admin is Unfold. Import `ModelAdmin` and inlines from `unfold.admin`.
+- Icons are Font Awesome, with `fa-fw` on each.
+
 ## Claude Code setup
 
-- Hooks run on every edit: the file is formatted, then `ddd_layer_guard.py` rejects imports that point outward. Fix the import it reports; do not work around the guard.
-- Destructive shell commands are blocked by `safety_check.py`. Ask the user instead of retrying.
-- For a feature that spans layers, follow the `ddd-feature` skill. Single pieces have their own skills (`new-usecase`, `new-gateway`, and so on).
-- Before handing work back, run `make lint` and `make test`, then ask the `ddd-reviewer` subagent for a review.
+- Skills, subagents, commands and hooks come from the `django-ddd` plugin, enabled in `.claude/settings.json`. `.claude/django-ddd.json` turns its hooks on and names the apps root and the formatters.
+- Hooks run on every edit: the file is formatted, then the layer guard rejects imports that point outward. Fix the import it reports; do not work around the guard.
+- `make architecture` runs the same check from `scripts/ddd_layer_guard.py`, a copy of the plugin's script kept here for CI.
+- Destructive shell commands are blocked by the plugin's safety check. Ask the user instead of retrying.
+- For a feature that spans layers, follow the `django-ddd:ddd-feature` skill. Single pieces have their own skills (`django-ddd:new-usecase`, `django-ddd:new-gateway`, and so on). The full rules are in `django-ddd:architecture`.
+- Before handing work back, run `make lint` and `make test`, then ask the `django-ddd:ddd-reviewer` subagent for a review.

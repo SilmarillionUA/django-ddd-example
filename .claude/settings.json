@@ -26,32 +26,15 @@
       "Read(./src/project_src/settings/production.py)"
     ]
   },
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/safety_check.py"
-          }
-        ]
+  "extraKnownMarketplaces": {
+    "django-ddd-claude-plugin": {
+      "source": {
+        "source": "github",
+        "repo": "SilmarillionUA/django-ddd-claude-plugin"
       }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Edit|MultiEdit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/auto_format.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/ddd_layer_guard.py"
-          }
-        ]
-      }
-    ]
+    }
+  },
+  "enabledPlugins": {
+    "django-ddd@django-ddd-claude-plugin": true
   }
 }

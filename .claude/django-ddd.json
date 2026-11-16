@@ -1,0 +1,12 @@
+{
+  "apps_root": "src/apps",
+  "format_commands": {
+    ".py": [
+      [".venv/bin/python", "-m", "isort", "--filter-files", "{file}"],
+      [".venv/bin/python", "-m", "black", "--quiet", "--force-exclude", "/migrations/", "{file}"]
+    ],
+    ".html": [
+      [".venv/bin/python", "-m", "djade", "--target-version", "5.2", "{file}"]
+    ]
+  }
+}

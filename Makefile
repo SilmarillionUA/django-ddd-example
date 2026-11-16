@@ -54,7 +54,7 @@ bandit:
 format: isort black djade
 
 architecture:
-	$(PYTHON) .claude/hooks/ddd_layer_guard.py --all
+	$(PYTHON) scripts/ddd_layer_guard.py --all
 
 lint: flake8 architecture
 	$(PYTHON) -m black --check src
